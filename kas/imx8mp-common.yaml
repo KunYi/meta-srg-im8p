@@ -1,0 +1,280 @@
+#  Sparktech/UWINGS for srg-im8p
+#
+# Authors:
+#   KunYi <kunyi.chen@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+#
+header:
+  version: 10
+
+distro: poky
+target: core-image-minimal
+build_system: openembedded
+
+repos:
+  meta-srg-im8p:
+
+  sources/poky:
+    url: "https://git.yoctoproject.org/git/poky"
+    refspec: 6a751048e50c00261d99c2d8d69534f7a8da38a9
+    layers:
+        meta:
+        meta-poky:
+    patches:
+      01-uncompressed-linux-kernel:
+        path: patches/0001-remove-compress-linux-kernel.patch
+        repo: meta-srg-im8p
+      02-zstd-support-ext4:
+        path: patches/0002-add-support-zstd-on-ext4-and-squash.patch
+        repo: meta-srg-im8p
+      03-hosttools-df:
+        path: patches/0003-add-df-into-HOSTTOOLS.patch
+        repo: meta-srg-im8p
+
+  sources/meta-openembedded:
+    url: "https://github.com/openembedded/meta-openembedded.git"
+    refspec: f3f7a5f1a4713f145107bb043e0d14cb3a51c62f
+    layers:
+        meta-oe:
+        meta-multimedia:
+        meta-networking:
+        meta-python:
+        meta-filesystems:
+        meta-gnome:
+
+  sources/meta-security:
+    url: "https://git.yoctoproject.org/git/meta-security"
+    refspec: 3daf99fd138b0eebe864bbe1b9c71241d97c4512
+    layers:
+        meta-tpm:
+
+# sources/meta-virtualization:
+#   url: https://git.yoctoproject.org/git/meta-virtualization
+#   refspec: fa093228c02c4a42da1f9abb77c4c57d70d5a212
+
+  sources/meta-swupdate:
+    url: "https://github.com/sbabic/meta-swupdate.git"
+    refspec: 744d6b96fc0290a7df9045e60c734c4924abfd4a
+
+  sources/meta-clang:
+    url: "https://github.com/kraj/meta-clang.git"
+    # the refspec for latest gatesgarth
+    refspec: 04a1194c78563524659f27941304e564956792b1
+
+  sources/meta-browser:
+    url: "https://github.com/OSSystems/meta-browser.git"
+    refspec: a5a5f277740a8434377f9844c62574efb17a4fa0
+    # refspec: 15228b01903d4ca801916e55c7618fa5a71019b7
+    layers:
+        meta-chromium:
+        meta-firefox:
+
+  sources/meta-freescale:
+    url: "https://github.com/Freescale/meta-freescale.git"
+    refspec: 1acf098972f9f86b26eee815827667dbd2fcdeaf
+    patches:
+      01-to-remove-imx8mp-evk-conf:
+        path: patches/0001-remove-imx8mn-imx8mp-evk-conf.patch
+        repo: meta-srg-im8p
+
+  sources/meta-freescale-3rdparty:
+    url: "https://github.com/Freescale/meta-freescale-3rdparty.git"
+    refspec: 896b28cad2efe77368b007151f726d3faaf8512b
+
+  sources/meta-freescale-distro:
+    url: "https://github.com/Freescale/meta-freescale-distro.git"
+    refspec: 50eb2b32e7702bc435049bfe0a98fc65c864c106
+
+  sources/meta-imx:
+    url: "https://source.codeaurora.org/external/imx/meta-imx.git"
+    refspec: 478d788fc1ecb4783a2702752a61f1035fe9ab9f
+    layers:
+      meta-bsp:
+      meta-ml:
+      meta-sdk:
+
+  sources/meta-python2:
+    url: "https://git.openembedded.org/meta-python2"
+    refspec: d9662a41f67c3425a356bce4ec29f82058127344
+
+  sources/meta-rust:
+    url: "https://github.com/meta-rust/meta-rust.git"
+    refspec: 1b59fd45906082c978d0a0a6e4e51a0ea4aa32c7
+#    refspec: 494d879a1d337cda5b3a19406cabe46fcd3aee76
+
+  # QT5.15.x for gatesgarth
+  sources/meta-qt5:
+    url: "https://code.qt.io/yocto/meta-qt5.git"
+    # lts 5.15.2 is latest GPL support
+    # late version need commercial license support
+    # so fix the commit id for lts-5.15.2
+    refspec: 41c0d8d277c76b0fda423f2aaa794d3f3889ce99
+
+  sources/meta-nxp-demo-experience:
+    url: https://source.codeaurora.org/external/imxsupport/meta-nxp-demo-experience
+    refspec: 46107357abd2d2da9ffd702c87fce3984a422435
+
+  sources/meta-iot-hub-device-update:
+    url: https://github.com/KunYi/meta-iot-hub-device-update.git
+    refspec: 92e2fc5d7b4034c6376bf8fb503c65a5222f41fc
+    patches:
+      01_remove_duplicate_swupdate:
+        repo: meta-srg-im8p
+        path: patches/0001-remove-duplicate-swupdate.patch
+
+bblayers_conf_header:
+  standard: |
+    # POKY_BBLAYERS_CONF_VERSION is increased each time build/conf/bblayers.conf
+    # changes incompatibly
+    POKY_BBLAYERS_CONF_VERSION = "2"
+    BBPATH = "${TOPDIR}"
+    BBFILES ?= ""
+
+local_conf_header:
+  standard: |
+    CONF_VERSION = "1"
+  machine: |
+    MACHINE = "srg-im8p"
+  distro: |
+    DISTRO = "poky"
+  sdk_machine: |
+    SDKMACHINE = "x86_64"
+  uboot_extlinux_conf: |
+    UBOOT_EXTLINUX = "1"
+    UBOOT_EXTLINUX_FDT = "/boot/srg-im8p.dtb"
+    UBOOT_EXTLINUX_FDTDIR = "../"
+    UBOOT_EXTLINUX_ROOT = "initrd=/boot/initrd.img /dev/mmcblk2p${bootpart}"
+
+  initramfs: |
+    # Configuration for the rootfs overlay.
+    INITRAMFS_IMAGE ?= "mx8mp-initramfs"
+    INITRAMFS_IMAGE_NAME ?= "mx8mp-initramfs-${MACHINE}"
+    # INITRAMFS_IMAGE_BUNDLE = "1"
+
+    #INITRAMFS_MAXSIZE = "315400"
+    IMAGE_FSTYPES_pn-${INITRAMFS_IMAGE} = "${INITRAMFS_FSTYPES}"
+
+  misc: |
+    #
+    # Package Management configuration
+    #
+    # This variable lists which packaging formats to enable. Multiple package backends
+    # can be enabled at once and the first item listed in the variable will be used
+    # to generate the root filesystems.
+    # Options are:
+    #  - 'package_deb' for debian style deb files
+    #  - 'package_ipk' for ipk files are used by opkg (a debian style embedded package manager)
+    #  - 'package_rpm' for rpm style packages
+    # E.g.: PACKAGE_CLASSES ?= "package_rpm package_deb package_ipk"
+    # We default to rpm:
+    PACKAGE_CLASSES ?= "package_deb"
+
+    #
+    # Additional image features
+    #
+    # The following is a list of additional classes to use when building images which
+    # enable extra features. Some available options which can be included in this variable
+    # are:
+    #   - 'buildstats' collect build statistics
+    #   - 'image-mklibs' to reduce shared library files size for an image
+    #   - 'image-prelink' in order to prelink the filesystem image
+    # NOTE: if listing mklibs & prelink both, then make sure mklibs is before prelink
+    # NOTE: mklibs also needs to be explicitly enabled for a given image, see local.conf.extended
+    USER_CLASSES ?= "buildstats image-mklibs image-prelink"
+
+    #
+    # Extra image configuration defaults
+    #
+    # The EXTRA_IMAGE_FEATURES variable allows extra packages to be added to the generated
+    # images. Some of these options are added to certain image types automatically. The
+    # variable can contain the following options:
+    #  "dbg-pkgs"       - add -dbg packages for all installed packages
+    #                     (adds symbol information for debugging/profiling)
+    #  "src-pkgs"       - add -src packages for all installed packages
+    #                     (adds source code for debugging)
+    #  "dev-pkgs"       - add -dev packages for all installed packages
+    #                     (useful if you want to develop against libs in the image)
+    #  "ptest-pkgs"     - add -ptest packages for all ptest-enabled packages
+    #                     (useful if you want to run the package test suites)
+    #  "tools-sdk"      - add development tools (gcc, make, pkgconfig etc.)
+    #  "tools-debug"    - add debugging tools (gdb, strace)
+    #  "eclipse-debug"  - add Eclipse remote debugging support
+    #  "tools-profile"  - add profiling tools (oprofile, lttng, valgrind)
+    #  "tools-testapps" - add useful testing tools (ts_print, aplay, arecord etc.)
+    #  "debug-tweaks"   - make an image suitable for development
+    #                     e.g. ssh root access has a blank password
+    # There are other application targets that can be used here too, see
+    # meta/classes/image.bbclass and meta/classes/core-image.bbclass for more details.
+    # We default to enabling the debugging tweaks.
+    EXTRA_IMAGE_FEATURES ?= "debug-tweaks"
+
+    #
+    # Disk Space Monitoring during the build
+    #
+    # Monitor the disk space during the build. If there is less that 1GB of space or less
+    # than 100K inodes in any key build location (TMPDIR, DL_DIR, SSTATE_DIR), gracefully
+    # shutdown the build. If there is less that 100MB or 1K inodes, perform a hard abort
+    # of the build. The reason for this is that running completely out of space can corrupt
+    # files and damages the build in ways which may not be easily recoverable.
+    # It's necesary to monitor /tmp, if there is no space left the build will fail
+    # with very exotic errors.
+    BB_DISKMON_DIRS ??= "\
+    STOPTASKS,${TMPDIR},1G,100K \
+    STOPTASKS,${DL_DIR},1G,100K \
+    STOPTASKS,${SSTATE_DIR},1G,100K \
+    STOPTASKS,/tmp,100M,100K \
+    ABORT,${TMPDIR},100M,1K \
+    ABORT,${DL_DIR},100M,1K \
+    ABORT,${SSTATE_DIR},100M,1K \
+    ABORT,/tmp,10M,1K"
+
+    # By default disable interactive patch resolution (tasks will just fail instead):
+    PATCHRESOLVE = "noop"
+
+    EXTRA_IMAGE_FEATURES += "package-management"
+
+    IMAGE_FSTYPES += "wic.gz wic.bmap ext4.zst"
+
+    # for accept freescale/nxp license
+    ACCEPT_FSL_EULA = "1"
+
+    # Set PREFERRED_PROVIDER_u-boot-fw-utils to prevent warning about
+    # having two providers of u-boot-fw-utils
+    PREFERRED_PROVIDER_u-boot-fw-utils = "libubootenv-bin"
+
+    #
+    # Use busybox/mdev for system initialization
+    #
+    # VIRTUAL-RUNTIME_dev_manager = "busybox-mdev"
+    # VIRTUAL-RUNTIME_login_manager = "busybox"
+    # VIRTUAL-RUNTIME_init_manager = "busybox"
+    # VIRTUAL-RUNTIME_initscripts = "initscripts"
+    # VIRTUAL-RUNTIME_keymaps = "keymaps"
+    # DISTRO_FEATURES_BACKFILL_CONSIDERED += "sysvinit"
+    #
+    #
+    # Use systemd for system initialization
+    #
+    # DISTRO_FEATURES_append = " systemd sysvinit"
+    # DISTRO_FEATURES_BACKFILL_CONSIDERED += "sysvinit"
+    # VIRTUAL-RUNTIME_init_manager = "systemd"
+    # VIRTUAL-RUNTIME_initscripts = "systemd-compat-units"
+    #
+    DISTRO_FEATURES_append = " systemd"
+    DISTRO_FEATURES_BACKFILL_CONSIDERED += "sysvinit"
+    VIRTUAL-RUNTIME_init_manager = "systemd"
+    # VIRTUAL-RUNTIME_initscripts = "systemd-compat-units"
+
+    MODEL_NAME = "srg-im8p"
+    HW_REV = "1.0"
+    RFS_VERSION ??= "1.0.0"
+
+    PREFERRED_PROVIDER_virtual/kernel = "linux-imx"
+
+    # for secure boot enable,
+    # 'yes' for enabled either for disable
+    # default disabled
+    ENABLED_SECURE_BOOT ??= "no"
+    # i.MX Code Sign Tools directory
+    CST_DIR ??= "${TOPDIR}/../cst"

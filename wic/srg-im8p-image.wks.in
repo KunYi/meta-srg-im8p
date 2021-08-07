@@ -1,0 +1,20 @@
+#
+# The disk layout used is:
+#  - ---------- -------------- ------------------------------------
+# | | imx-boot |    rootA     |     rootB    |        data        |
+#  - ---------- -------------- ------------------------------------
+# ^ ^          ^              ^              ^
+# | |          |              |              |
+# 0 |        8MiB           8MiB + 4480MiB   | 8Mib + 4480MiB + 4480MiB
+#   ${IMX_BOOT_SEEK} 32 or 33kiB, see reference manual
+#
+
+part u-boot --source rawcopy --sourceparams="file=imx-boot" --ondisk mmcblk --no-table --align ${IMX_BOOT_SEEK}
+
+part / --source rootfs            --ondisk mmcblk --fstype=ext4 --label rootA --align 8192 --fixed-size=4480 --active
+part   --source rootfs            --ondisk mmcblk --fstype=ext4 --label rootB --align 8192 --fixed-size=4480
+# part / --source rootfs            --ondisk mmcblk --fstype=squashfs --align 8192 --fixed-size=2432 --active
+# part   --source rootfs            --ondisk mmcblk --fstype=squashfs --align 8192 --fixed-size=2432
+part /data                        --ondisk mmcblk --fstype=ext4 --label data  --align 4096 --fixed-size=1024
+
+bootloader  --ptable gpt

@@ -1,0 +1,366 @@
+From 22d5ab88f6525461adde0e556e66a61626d12b68 Mon Sep 17 00:00:00 2001
+From: KunYi <kunyi.chen@gmail.com>
+Date: Tue, 27 Apr 2021 14:22:42 +0800
+Subject: [PATCH] remove duplicate swupdate
+
+---
+ .../swupdate/swupdate/09-swupdate-args        |  16 --
+ recipes-support/swupdate/swupdate/defconfig   |  65 ------
+ .../swupdate/swupdate/swupdate.cfg            | 208 ------------------
+ recipes-support/swupdate/swupdate_%.bbappend  |  34 ---
+ 4 files changed, 323 deletions(-)
+ delete mode 100644 recipes-support/swupdate/swupdate/09-swupdate-args
+ delete mode 100644 recipes-support/swupdate/swupdate/defconfig
+ delete mode 100644 recipes-support/swupdate/swupdate/swupdate.cfg
+ delete mode 100644 recipes-support/swupdate/swupdate_%.bbappend
+
+diff --git a/recipes-support/swupdate/swupdate/09-swupdate-args b/recipes-support/swupdate/swupdate/09-swupdate-args
+deleted file mode 100644
+index 3d9f8c9..0000000
+--- a/recipes-support/swupdate/swupdate/09-swupdate-args
++++ /dev/null
+@@ -1,16 +0,0 @@
+-
+-# SWUpdate doesn't support everything necessary for the dual-copy or A/B update strategy.
+-# Here we figure out the current OS partition and then set some environment variables
+-# that we use to tell swupdate which partition to target.
+-rootfs_dev=$(mount | grep "on / type" | cut -d':' -f 2 | cut -d' ' -f 1)
+-if [[ $rootfs_dev == '/dev/mmcblk0p2' ]]; then
+-    selection="stable,copy2"
+-#    current_part=2
+-#    update_part=3
+-else
+-    selection="stable,copy1"
+-#    current_part=3
+-#    update_part=2
+-fi
+-
+-SWUPDATE_ARGS="${SWUPDATE_ARGS} -e ${selection}"
+diff --git a/recipes-support/swupdate/swupdate/defconfig b/recipes-support/swupdate/swupdate/defconfig
+deleted file mode 100644
+index 70310f5..0000000
+--- a/recipes-support/swupdate/swupdate/defconfig
++++ /dev/null
+@@ -1,65 +0,0 @@
+-CONFIG_HAVE_DOT_CONFIG=y
+-
+-#
+-# General Configuration
+-#
+-# CONFIG_MTD is not set
+-# CONFIG_CURL is not set
+-# CONFIG_CURL_SSL is not set
+-CONFIG_SYSTEMD=y
+-CONFIG_DEFAULT_CONFIG_FILE="/etc/swupdate.cfg"
+-CONFIG_SCRIPTS=y
+-CONFIG_HW_COMPATIBILITY=y
+-CONFIG_HW_COMPATIBILITY_FILE="/etc/adu-hw-compat"
+-
+-#
+-# Socket Paths
+-#
+-CONFIG_LUA=y
+-CONFIG_LUAPKG="lua"
+-# CONFIG_FEATURE_SYSLOG is not set
+-
+-#
+-# Build Options
+-#
+-CONFIG_CROSS_COMPILE=""
+-CONFIG_SYSROOT=""
+-CONFIG_EXTRA_CFLAGS=""
+-CONFIG_EXTRA_LDFLAGS=""
+-CONFIG_EXTRA_LDLIBS=""
+-
+-CONFIG_UBOOT=y
+-CONFIG_UBOOT_NEWAPI=y
+-CONFIG_UBOOT_FWENV="/etc/fw_env.config"
+-CONFIG_HASH_VERIFY=y
+-CONFIG_SIGNED_IMAGES=y
+-CONFIG_SIGALG_RAWRSA=y
+-
+-CONFIG_GUNZIP=y
+-CONFIG_ZSTD=y
+-
+-#
+-# embedded web server
+-#
+-CONFIG_WEBSERVER=y
+-CONFIG_MONGOOSESSL=y
+-
+-#
+-#Parser Features
+-#
+-CONFIG_LIBCONFIG=y
+-CONFIG_PARSERROOT=""
+-
+-#
+-# Image Handler
+-#
+-CONFIG_RAW=y
+-CONFIG_ARCHIVE=y
+-CONFIG_BOOTLOADERHANDLER=y
+-CONFIG_RDIFFHANDLER=y
+-CONFIG_LUASCRIPTHANDLER=y
+-CONFIG_SHELLSCRIPTHANDLER=y
+-CONFIG_HANDLER_IN_LUA=y
+-CONFIG_REMOTE_HANDLER=y
+-
+-
+diff --git a/recipes-support/swupdate/swupdate/swupdate.cfg b/recipes-support/swupdate/swupdate/swupdate.cfg
+deleted file mode 100644
+index 60b4ace..0000000
+--- a/recipes-support/swupdate/swupdate/swupdate.cfg
++++ /dev/null
+@@ -1,208 +0,0 @@
+-#
+-# globals : general configuration for the installer
+-#
+-# verbose		: boolean
+-#			  set verbose mode (Default: false)
+-# loglevel 		: integer
+-#			  level for logging from 1 (no log) to 6
+-# syslog 		: boolean
+-#	 		  enable sending logs to syslog daemon
+-# public-key-file	: string
+-#			  file with public key for
+-#			  image verification
+-# mtd-blacklist		: list integers
+-#			  MTD devices where SWUpdate
+-#			  must not try to check for UBI filesystem.
+-# aes-key-file		: string
+-#			  file containing the symmetric key for
+-#			  image decryption
+-# preupdatecmd		: string
+-#			  command to be executed right before the update
+-#			  is installed
+-# postupdatecmd		: string
+-#			  command to be executed after a successful update
+-# ca-path		: string
+-#			  path to the Certificate Authority (PEM)
+-# no-downgrading	: string
+-#			  not install a release older as <version>
+-# no-reinstalling	: string
+-#			  not install a release same as <version>
+-# cert-purpose		: string
+-#			  set expected certificate purpose
+-#			  [emailProtection|codeSigning] (default: emailProtection)
+-# forced-signer-name	: string
+-#			  set expected common name of signer certificate
+-# select:		: string
+-#			  select software images set and source (<software>,<mode>)
+-globals :
+-{
+-	verbose = true;
+-	loglevel = 5;
+-	syslog = true;
+-	public-key-file = "/adukey/public.pem";
+-};
+-
+-#
+-# logcolors : set colors for output to stdout / stderr
+-#             color is set indivisually for each level
+-#             each entry is in the format
+-#             loglevel = color:attribute
+-# where loglevel is one of:
+-# 	"error","warning", "info", "debug", "trace"
+-# and color is one of:
+-# 	"black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"
+-# and attribute is one of:
+-# 	"normal", "bright", "dim", "underline", "blink", "reverse", "hidden"
+-#
+-# Example :
+-# 	error = "red";
+-#
+-logcolors : {
+-	error = "red:blink";
+-	trace = "green:normal";
+-	debug = "magenta:normal";
+-	warning = "yellow:underline";
+-};
+-
+-#
+-# download : setup for the downloader
+-#            It requires that SWUpdate is started with -d
+-#
+-# url			: string
+-#			  complete URL pointing to the SWU image of the update package
+-# retries		: integer
+-#			  Number of retries (0=forever)
+-# timeout		: integer
+-#			  it is the number of seconds that can be accepted without
+-#			  receiving any packets. If it elapses, the connection is
+-#			  considered broken.
+-# authentication	: string
+-#			  credentials needed to get software if server
+-#			  enables Basic Auth to allow this downloading
+-download :
+-{
+-	retries = 3;
+-	timeout = 1800;
+-};
+-
+-#
+-# identify section : it is just used to inform a backend about the running target
+-# any entry is a copule of <key, vealue>. For example, MAC address, serial number,
+-# and so on.
+-identify : (
+-	{ name = "raspberrypi3"; value = "1.0"; },
+-	{ name = "versionSpC"; value = "1.0"; },
+-	{ name = "hwId"; value = "ipse"; },
+-	{ name = "hwVersion"; value = "333"; },
+-	{ name = "serialNo"; value = "1234567890"; },
+-	{ name = "swCompatibility"; value = "unknown";}
+-);
+-
+-#
+-# suricatta section: setup for backend
+-#
+-# Currently, they refer to the Hawkbit agent.
+-#
+-# tenant		: string
+-#			  Hawkbit tenant
+-# id			: string
+-#			  target identifier
+-# url			: string
+-#			  URL of the Hawkbit server
+-# polldelay		: integer
+-#			  polling cycle (seconds)
+-# retry			: integer
+-#			  number of retries to connect to server
+-# retrywait		: integer
+-# userid		: integer
+-#			  userID for Webserver process
+-# groupid		: integer
+-#			  groupId for Webserver process
+-# enable		: bool
+-# 			  default=true
+-# 			  If set to false, suricatta do not try to connect to the server
+-# 			  Enable can be done then via IPC
+-# cafile		: string
+-# 			  File with Public Certificate Authority
+-# sslkey		: string
+-#			  path of the file containing the key for ssl connection
+-# sslcert		: string
+-#			  path of the file containing the certificate for SSL connection
+-# targettoken	: string
+-#			  hawkBit target security token
+-# gatewaytoken	: string
+-#			  hawkBit gateway security token
+-# usetokentodwl :bool
+-# 			  send authentication token also to download the artefacts
+-# 			  Hawkbit server checks for the token, but if a SWU is stored on a different server
+-# 			  the token can be rejected if a different authentication mechanism is used. Default on.
+-# proxy			: string
+-#			  in case the server is reached via a proxy
+-# ciphers		: string in the format used by CURL to set the allowed ciphers suite
+-#			  This allows to disable some ciphers, for example
+-#			  ciphers = "!eNULL:!aNULL:!EXP:!LOW:!MEDIUM:!ADH:!AECDH:!IDEA:!SEED:!MD5:!SHA:!RC4:HIGH+EECDH:HIGH+EDH";
+-# interface		: string
+-#			  interface name (e.g. "eth0") or IP address to bind communication channel to.
+-#			  This allows to select source interface/address for outgoing traffic, if needed.
+-suricatta :
+-{
+-	tenant		= "default";
+-	id		= "raspberrypi3";
+-	confirm 	= 0;
+-	url 		= "http://paperina2:8280";
+-	polldelay	= 60;
+-	nocheckcert	= true;
+-	retry		= 4;
+-	retrywait	= 200;
+-	loglevel	= 10;
+-	userid		= 0;
+-	groupid		= 0;
+-	max_artifacts	= 1;
+-/*
+-	cafile		= "/etc/ssl/cafile";
+-	sslkey		= "/etc/ssl/sslkey";
+-	sslcert		= "/etc/ssl/sslcert";
+-*/
+-};
+-
+-#
+-# webserver : setup for the embedded webserver
+-# see ./swupdate -h for details
+-#
+-# document_root		: string
+-#			  directory to the website
+-# userid		: integer
+-#			  userID for Webserver process
+-# groupid		: integer
+-#			  groupId for Webserver process
+-# listening_ports	: integer
+-#			  Webserver listening ports
+-# enable_directory_listing : boolean
+-#			  true to list directories
+-# ssl_certificate	: string
+-#			  path to SSL certificat
+-# ssl_certificate_key	: string
+-#			  path to SSL private key
+-# api			: integer
+-#			  1 = simple REST API for M2M communication
+-#			  2 = WebApp with Websockets support
+-# global-auth-file	: string
+-#			  path to the global authorization file, if any
+-#			  default = none
+-# auth-domain		: string
+-#			  path to auth-domain, if any
+-#			  default = none
+-# run-postupdate	: boolean (default true)
+-#			  run the postupdate command automatically after
+-#			  a successful update
+-# timeout		: timeout in seconds to monitor the connection
+-#			  when an update is started. If no data is received
+-#			  during this time, connection is closed by the Webserver
+-#			  and update is aborted.
+-webserver :
+-{
+-	document_root = "/www";
+-	userid		= 0;
+-	groupid		= 0;
+-};
+-
+diff --git a/recipes-support/swupdate/swupdate_%.bbappend b/recipes-support/swupdate/swupdate_%.bbappend
+deleted file mode 100644
+index 32e9d3e..0000000
+--- a/recipes-support/swupdate/swupdate_%.bbappend
++++ /dev/null
+@@ -1,34 +0,0 @@
+-# for override original defconfig
+-
+-FILESEXTRAPATHS_append := "${THISDIR}/${PN}:"
+-
+-PACKAGECONFIG_CONFARGS = ""
+-
+-SRC_URI += " \
+-     file://swupdate.cfg \
+-     file://09-swupdate-args \
+-     "
+-ADU_HW_COMPAT ?= "${MODEL_NAME} ${HW_REV}"
+-ADUC_PUBLIC_KEY ?= "${TOPDIR}/../keys/public.pem"
+-
+-do_compile_append() {
+-    echo "${ADU_HW_COMPAT}" > ${WORKDIR}/adu-hw-compat
+-}
+-
+-do_install_append() {
+-    install -d ${D}${sysconfdir}
+-    install -m 644 ${WORKDIR}/swupdate.cfg ${D}${sysconfdir}/swupdate.cfg
+-    install -m 644 ${WORKDIR}/adu-hw-compat ${D}${sysconfdir}/adu-hw-compat
+-    install -d ${D}/adukey
+-    install -m 644 ${ADUC_PUBLIC_KEY} ${D}/adukey/public.pem
+-
+-    install -d ${D}${libdir}/swupdate/conf.d
+-    echo "SWUPDATE_ARGS=\"\$SWUPDATE_ARGS -k /adukey/public.pem\"" > ${D}${libdir}/swupdate/conf.d/adu-swupdate.env
+-    echo "SWUPDATE_WEBSERVER_ARGS=\"-r /www\"" >> ${D}${libdir}/swupdate/conf.d/adu-swupdate.env
+-    install -m 644 ${WORKDIR}/09-swupdate-args ${D}${libdir}/swupdate/conf.d/09-swupdate-args
+-}
+-
+-FILES_${PN} += "/adukey/public.pem"
+-FILES_${PN} += "${sysconfdir}/swupdate.cfg"
+-
+-DEPANDS_append += "curl"
+-- 
+2.31.1
+
