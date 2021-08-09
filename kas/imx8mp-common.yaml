@@ -49,10 +49,6 @@ repos:
     layers:
         meta-tpm:
 
-# sources/meta-virtualization:
-#   url: https://git.yoctoproject.org/git/meta-virtualization
-#   refspec: fa093228c02c4a42da1f9abb77c4c57d70d5a212
-
   sources/meta-swupdate:
     url: "https://github.com/sbabic/meta-swupdate.git"
     refspec: 744d6b96fc0290a7df9045e60c734c4924abfd4a
@@ -65,7 +61,6 @@ repos:
   sources/meta-browser:
     url: "https://github.com/OSSystems/meta-browser.git"
     refspec: a5a5f277740a8434377f9844c62574efb17a4fa0
-    # refspec: 15228b01903d4ca801916e55c7618fa5a71019b7
     layers:
         meta-chromium:
         meta-firefox:
@@ -101,7 +96,6 @@ repos:
   sources/meta-rust:
     url: "https://github.com/meta-rust/meta-rust.git"
     refspec: 1b59fd45906082c978d0a0a6e4e51a0ea4aa32c7
-#    refspec: 494d879a1d337cda5b3a19406cabe46fcd3aee76
 
   # QT5.15.x for gatesgarth
   sources/meta-qt5:
@@ -114,14 +108,6 @@ repos:
   sources/meta-nxp-demo-experience:
     url: https://source.codeaurora.org/external/imxsupport/meta-nxp-demo-experience
     refspec: 46107357abd2d2da9ffd702c87fce3984a422435
-
-  sources/meta-iot-hub-device-update:
-    url: https://github.com/KunYi/meta-iot-hub-device-update.git
-    refspec: 92e2fc5d7b4034c6376bf8fb503c65a5222f41fc
-    patches:
-      01_remove_duplicate_swupdate:
-        repo: meta-srg-im8p
-        path: patches/0001-remove-duplicate-swupdate.patch
 
 bblayers_conf_header:
   standard: |
