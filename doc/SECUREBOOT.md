@@ -63,3 +63,4 @@ the device on booting with signed image now.
 
 ### References:
 1. [NXP i.MX8M Secure boot](https://source.codeaurora.org/external/imx/uboot-imx/tree/doc/imx/habv4/guides/mx8m_secure_boot.txt?h=lf_v2020.04), NXP i.MX8M secure boot/habv4
+2. [AN4581 - i.MX Secure Boot on HABv4 Supported Devices](https://www.nxp.com/docs/en/application-note/AN4581), requirement login NXP website

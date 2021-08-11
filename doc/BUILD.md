@@ -42,6 +42,15 @@ Build swupdate package, to make a software update package.
 
 Will make **srg-im8p-update-srg-im8p.swu**
 
+Build sdk/toolchain for end user
+
+```
+./kas-container shell srg-im8p-image.yaml -c 'bitbake -c populate_sdk srg-im8p-image'
+```
+
+the command will generation **srg-iotgateway-glibc-x86_64-srg-im8p-image-cortexa53-crypto-srg-im8p-toolchain-5.10-gatesgarth.sh** under ${BSP_DIR}/build/tmp/deploy/sdk
+
+
 if you want enable secure boot feature, to attach **:secureboot.yaml** on tail of build command , for example
 ```
 ./kas-container build srg-im8p-image.yaml:secureboot.yaml
