@@ -22,6 +22,7 @@ SWUPDATE_IMAGES_FSTYPES[srg-im8p-image] = ".ext4.zst"
 RFS_VERSION ?= "1.0.1"
 SWU_PRIVATE_KEY ?= "${TOPDIR}/../swu-keys/priv.pem"
 SWU_PRIVATE_KEY_PASSWORD ?= "${TOPDIR}/../swu-keys/passout"
+SWU_SOFTWARE_VERSION ??= "1.0.0"
 
 python () {
     # detect in docker
