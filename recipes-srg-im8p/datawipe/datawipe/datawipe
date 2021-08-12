@@ -10,7 +10,7 @@ function NotRoot() {
     ! ((${EUID:-0} || "$(id -u)"))
 }
 
-if [  NotRoot ]; then
+if [ ! NotRoot ]; then
 	echo "need root permission"
 	exit 1
 fi
