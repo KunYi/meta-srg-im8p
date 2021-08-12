@@ -30,9 +30,11 @@ clear_datawipe_variable() {
 }
 
 if [ ! -e /etc/device-init ]; then
+	[ ! -e /etc/u-boot-initial-env ] && ln -ns /etc/u-boot-aaeon-initial-env /etc/u-boot-initial-env
+	logger "create device-init for finish"
 	clear_datawipe_variable
 	touch /etc/device-init
-	logger "create device-init for finish"
+
 fi
 
 $HWCLOCK2SYS
