@@ -1,0 +1,60 @@
+# HAB fuse prog for SRG-IM8P
+#   run the below commands in u-boot
+#
+fuse prog -y 6 0 0x1F445942
+fuse prog -y 6 1 0x7840061B
+fuse prog -y 6 2 0xDEB73465
+fuse prog -y 6 3 0xC85C7167
+fuse prog -y 7 0 0xA61A0075
+fuse prog -y 7 1 0x4028DE49
+fuse prog -y 7 2 0xF1CEA557
+fuse prog -y 7 3 0x07453759
+
+#####################################################################
+# running log
+# u-boot=> fuse prog -y 6 0 0x1F445942
+# Programming bank 6 word 0x00000000 to 0x1f445942...
+# u-boot=> fuse prog -y 6 1 0x7840061B
+# Programming bank 6 word 0x00000001 to 0x7840061b...
+# u-boot=> fuse prog -y 6 2 0xDEB73465
+# Programming bank 6 word 0x00000002 to 0xdeb73465...
+# u-boot=> fuse prog -y 6 3 0xC85C7167
+# Programming bank 6 word 0x00000003 to 0xc85c7167...
+# u-boot=> fuse prog -y 7 0 0xA61A0075
+# Programming bank 7 word 0x00000000 to 0xa61a0075...
+# u-boot=> fuse prog -y 7 1 0x4028DE49
+# Programming bank 7 word 0x00000001 to 0x4028de49...
+# u-boot=> fuse prog -y 7 2 0xF1CEA557
+# Programming bank 7 word 0x00000002 to 0xf1cea557...
+# u-boot=> fuse prog -y 7 3 0x07453759
+# Programming bank 7 word 0x00000003 to 0x07453759...
+#####################################################################
+
+# then you need reboot the device
+# and run 'hab_status' command
+#
+#
+# u-boot=> hab_status
+#
+# Secure boot disabled
+#
+# HAB Configuration: 0xf0, HAB State: 0x66
+# No HAB Events Found!
+#
+#
+# Check the 'No HAB Events Found!', the mean no error on check sign image
+#
+# for close the device to enabled HAB, please remain
+fuse prog 1 3 0x02000000
+
+# u-boot=> fuse prog 1 3 0x02000000
+# Programming bank 1 word 0x00000003 to 0x02000000...
+# Warning: Programming fuses is an irreversible operation!
+#         This may brick your system.
+#         Use this command only if you are sure of what you are doing!
+#
+# Really perform this fuse programming? <y/N>
+# y
+# u-boot=> reset
+# resetting ...
+#

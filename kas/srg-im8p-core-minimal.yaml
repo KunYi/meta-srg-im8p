@@ -1,0 +1,17 @@
+#  Sparktech/UWINGS for srg-im8p
+#
+# Authors:
+#   KunYi <kunyi.chen@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+#
+header:
+  version: 10
+  includes:
+    - imx8mp-common.yaml
+
+distro: poky
+target: core-image-minimal
+
+repos:
+  meta-srg-im8p:
