@@ -51,7 +51,13 @@ create an update task on Hawkbit server.
 ![Hawkbit Update swu](./pictures/hawkbit-update-swu.png)
 ![Hawkbit Update](./pictures/hawkbit-update.png)
 
-6. enable the update task
+6. to dragging distribution to target device for enable update task
+
+![Hawkbit update action](./pictures/hawkbit-assign-device.png)
+
+7. complete update action
+
+![Hawkbit finish update to device](./pictures/hawkbit-update-finish.png)
 
 modify tips for Swupdate
 ===
