@@ -3,6 +3,7 @@ require recipes-core/images/core-image-minimal.bb
 DESCRIPTION = "SD Card installer image"
 LICENSE="MIT"
 
+
 INSTALLED_IMAGE ??= "srg-im8p-image"
 IMAGE_SUFFIX ??= "wic.gz"
 
@@ -66,8 +67,9 @@ echo \"===================================\"\n\
 echo \"= adjust gpt table/partition size =\"\n\
 echo \"===================================\"\n\
 sgdisk -e /dev/\$EMMC_DEV       # fixed gpt tabel\n\
-parted -s /dev/\$EMMC_DEV resizepart 3 100%\n\
-resize2fs /dev/\${EMMC_DEV}p3   # resize filesystem\n\
+parted -s /dev/\$EMMC_DEV resizepart 4 100%\n\
+resize2fs /dev/\${EMMC_DEV}p4   # resize filesystem\n\
+
 \n\
 # flash bootloader into EMMC boot0 partition\n\
 echo \"===================================\"\n\

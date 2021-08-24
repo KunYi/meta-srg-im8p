@@ -1,0 +1,25 @@
+From 494c78bb91da2b63a0c5f989d5e3c37efd82bca1 Mon Sep 17 00:00:00 2001
+From: KunYi <kunyi.chen@gmail.com>
+Date: Sun, 22 Aug 2021 18:34:29 +0800
+Subject: [PATCH] add df into HOSTTOOLS
+
+---
+ meta/conf/bitbake.conf | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meta/conf/bitbake.conf b/meta/conf/bitbake.conf
+index 5b52e9307e..6282ee12ad 100644
+--- a/meta/conf/bitbake.conf
++++ b/meta/conf/bitbake.conf
+@@ -482,7 +482,7 @@ HOSTTOOLS_DIR = "${TMPDIR}/hosttools"
+ # Tools needed to run builds with OE-Core
+ HOSTTOOLS += " \
+     [ ar as awk basename bash bzip2 cat chgrp chmod chown chrpath cmp comm cp cpio \
+-    cpp cut date dd diff diffstat dirname du echo egrep env expand expr false \
++    cpp cut date dd df diff diffstat dirname du echo egrep env expand expr false \
+     fgrep file find flock g++ gawk gcc getconf getopt git grep gunzip gzip \
+     head hostname iconv id install ld ldd ln ls make md5sum mkdir mkfifo mknod \
+     mktemp mv nm objcopy objdump od patch perl pr printf pwd \
+-- 
+2.33.0
+

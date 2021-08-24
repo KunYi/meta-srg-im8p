@@ -1,20 +1,33 @@
 #
 # The disk layout used is:
-#  - ---------- -------------- ------------------------------------
-# | | imx-boot |    rootA     |     rootB    |        data        |
-#  - ---------- -------------- ------------------------------------
-# ^ ^          ^              ^              ^
-# | |          |              |              |
-# 0 |        8MiB           8MiB + 4480MiB   | 8Mib + 4480MiB + 4480MiB
+#  - ---------- -------------- --------------- ----------------- ---------------------
+# | | imx-boot |      ESP     |     rootA     |      rootB      |        data        |
+#  - ---------- -------------- --------------- ----------------- ---------------------
+# ^ ^          ^              ^               ^                 ^
+# | |          |              |               |                 |
+# 0 |        8MiB        8MiB + 128MiB   8MiB + 128MiB    8MiB + 128MiB
+#                                         + 4480MiB        + 4480MiB + 4480MiB
 #   ${IMX_BOOT_SEEK} 32 or 33kiB, see reference manual
 #
 
 part u-boot --source rawcopy --sourceparams="file=imx-boot" --ondisk mmcblk --no-table --align ${IMX_BOOT_SEEK}
 
-part / --source rootfs            --ondisk mmcblk --fstype=ext4 --label rootA --align 8192 --fixed-size=4480 --active
-part   --source rootfs            --ondisk mmcblk --fstype=ext4 --label rootB --align 8192 --fixed-size=4480
-# part / --source rootfs            --ondisk mmcblk --fstype=squashfs --align 8192 --fixed-size=2432 --active
+# ESP
+part /boot --source bootimg-partition --ondisk mmcblk --fstype=vfat --label boot --active --align 8192 --fixed-size 128M --part-type c12a7328-f81f-11d2-ba4b-00a0c93ec93b --part-name "'EFI System Partition'"
+
+# RootA/Linux Aarch64 Root
+part / --source rootfs            --ondisk mmcblk --fstype=ext4 --label rootA --fixed-size 4480M --part-type b921b045-1df0-41c3-af44-4c6f280d3fae --part-name "'Linux ARM64 root'"
+
+# RootB/Linux Aarch64 alternate Root
+part   --source rootfs            --ondisk mmcblk --fstype=ext4 --label rootB --fixed-size 4480M --part-type 8da63339-0007-60c0-c436-083ac8230908 --part-name "'Alternate root'"
+
+# User data/Linux filesystem
+part /data                        --ondisk mmcblk --fstype=ext4 --label data --fixed-size 384M --part-type 0fc63daf-8483-4772-8e79-3d69d8477de4 --part-name "'Linux Filesytem'"
+
+#
+# part / --source rootfs            --ondisk mmcblk --fstype=ext4 --label rootA --align 8192 --fixed-size=4480
+# part   --source rootfs            --ondisk mmcblk --fstype=ext4 --label rootB --align 8192 --fixed-size=4480
+# part / --source rootfs            --ondisk mmcblk --fstype=squashfs --align 8192 --fixed-size=2432
 # part   --source rootfs            --ondisk mmcblk --fstype=squashfs --align 8192 --fixed-size=2432
-part /data                        --ondisk mmcblk --fstype=ext4 --label data  --align 4096 --fixed-size=1024
 
 bootloader  --ptable gpt

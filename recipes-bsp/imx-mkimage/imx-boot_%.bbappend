@@ -13,11 +13,42 @@ python () {
             d.setVar('CST_DIR', d.getVar('CST_DIR').replace('build/..', 'repo'))
 }
 
+compile_mx8m_append() {
+    cp ${DEPLOY_DIR_IMAGE}/${BOOT_TOOLS}/${UBOOT_DTB_NAME}   ${BOOT_STAGING}/imx8mp-evk.dtb
+}
+
+do_compile() {
+    compile_${SOC_FAMILY}
+    # Copy TEE binary to SoC target folder to mkimage
+    if ${DEPLOY_OPTEE}; then
+        cp ${DEPLOY_DIR_IMAGE}/tee.bin                       ${BOOT_STAGING}
+    fi
+    # mkimage for i.MX8
+    for target in ${IMXBOOT_TARGETS}; do
+        if [ "$target" = "flash_linux_m4_no_v2x" ]; then
+           # Special target build for i.MX 8DXL with V2X off
+           bbnote "building ${SOC_TARGET} - ${REV_OPTION} V2X=NO ${target}"
+           make SOC=${SOC_TARGET} ${REV_OPTION} V2X=NO  flash_linux_m4 flash_linux_m4 2>&1 | tee imx-boot.log
+        else
+           bbnote "building ${SOC_TARGET} - ${REV_OPTION} ${target}"
+           make SOC=${SOC_TARGET} ${REV_OPTION} ${target} 2>&1 | tee imx-boot.log
+           make SOC=${SOC_TARGET} ${REV_OPTION} print_fit_hab 2>&1 | tee imx-boot-fit-hab.log
+        fi
+        if [ -e "${BOOT_STAGING}/flash.bin" ]; then
+            cp ${BOOT_STAGING}/flash.bin ${S}/${BOOT_CONFIG_MACHINE}-${target}
+        fi
+    done
+}
 do_deploy_append() {
+
     if [ ! "x${ENABLED_SECURE_BOOT}" = "xyes" ]; then
 	echo "no secure boot"
 	exit 0
     fi
+
+    # copy the mkimage log to deploy path
+    install -m 0644 ${S}/imx-boot.log                        ${DEPLOYDIR}/${BOOT_TOOLS}
+    install -m 0644 ${S}/imx-boot-fit-hab.log                ${DEPLOYDIR}/${BOOT_TOOLS}
 
     bbnote "enabled secure boot feature, to run signtool"
     if [ ! -d ${CST_DIR} ] && [ ! -e ${CST_DIR}/linux64/bin/cst ]; then

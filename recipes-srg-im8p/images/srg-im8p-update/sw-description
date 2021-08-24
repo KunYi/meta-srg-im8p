@@ -13,7 +13,7 @@
               "sha256": "@srg-im8p-image-@@MACHINE@@.ext4.zst",
               "type": "raw",
               "compressed": "zstd",
-              "device": "/dev/mmcblk2p1",
+              "device": "/dev/mmcblk2p2",
               "name": "rootfs",
               "version": "@@RFS_VERSION@@",
               "install-if-different": true
@@ -22,7 +22,7 @@
           "bootenv": [
             {
               "name": "bootpart",
-              "value": "1"
+              "value": "2"
             },
             {
               "name": "upgrade_available",
@@ -41,7 +41,7 @@
               "sha256": "@srg-im8p-image-@@MACHINE@@.ext4.zst",
               "type": "raw",
               "compressed": "zstd",
-              "device": "/dev/mmcblk2p2",
+              "device": "/dev/mmcblk2p3",
               "name": "rootfs",
               "version": "@@RFS_VERSION@@",
               "install-if-different": true
@@ -50,7 +50,7 @@
           "bootenv": [
             {
               "name": "bootpart",
-              "value": "2"
+              "value": "3"
             },
             {
               "name": "upgrade_available",

@@ -11,13 +11,17 @@ CONFLICT_DISTRO_FEATURES = "directfb"
 ML_PKGS                   ?= ""
 ML_STATICDEV              ?= ""
 ML_PKGS_mx8                = "packagegroup-imx-ml"
-ML_STATICDEV_mx8           = "tensorflow-lite-staticdev"
+ML_STATICDEV_mx8           = ""
 ML_PKGS_mx8dxl             = ""
 ML_STATICDEV_mx8dxl        = ""
 ML_PKGS_mx8phantomdxl      = ""
 ML_STATICDEV_mx8phantomdxl = ""
 ML_PKGS_mx8mnlite          = ""
 ML_STATICDEV_mx8mnlite     = ""
+
+TOOLCHAIN_TARGET_TASK += " \
+    ${ML_STATICDEV} \
+"
 
 # Add opencv for i.MX GPU
 OPENCV_PKGS       ?= ""

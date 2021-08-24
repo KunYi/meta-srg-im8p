@@ -20,6 +20,9 @@ target: sd-installer
 local_conf_header:
   distro: |
     DISTRO = "poky"
+  bootloader_version: |
+    PREFERRED_VERSION_u-boot-imx_mx8mp = "2020.04"
+    PREFERRED_VERSION_virtual/bootloader_mx8mp = "2020.04"
   initramfs: |
     INITRAMFS_IMAGE = "mx8mp-install-initramfs"
     INITRAMFS_IMAGE_NAME = "mx8mp-install-initramfs-${MACHINE}"
@@ -28,3 +31,4 @@ local_conf_header:
   install_images: |
     INSTALLED_IMAGE = "srg-im8p-image"
     IMAGE_SUFFIX = "wic.gz"
+

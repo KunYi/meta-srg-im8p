@@ -27,6 +27,10 @@ local_conf_header:
     MODEL_NAME = "srg-im8p"
     HW_REV = "1.0"
 
+  bootloader_version: |
+    PREFERRED_VERSION_u-boot-imx_mx8mp = "2021.04"
+    PREFERRED_VERSION_virtual/bootloader_mx8mp = "2021.04"
+
   swupdate: |
     RFS_VERSION = "1.0.1"
     SWU_PRIVATE_KEY = "${TOPDIR}/../swu-keys/priv.pem"

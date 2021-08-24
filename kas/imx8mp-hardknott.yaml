@@ -1,0 +1,101 @@
+#  UWINGS for srg-im8p
+#
+# Authors:
+#   KunYi <kunyi.chen@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+#
+
+header:
+  version: 10
+
+repos:
+  meta-srg-im8p:
+
+  sources/poky:
+    url: "https://git.yoctoproject.org/git/poky"
+    refspec: e35dc77f77f9ab3f3a96819201bc84fb14e205a8
+    layers:
+        meta:
+        meta-poky:
+    patches:
+      01-hosttools-df:
+        path: patches/0001-add-df-into-HOSTTOOLS.patch
+        repo: meta-srg-im8p
+
+  sources/meta-openembedded:
+    url: "https://github.com/openembedded/meta-openembedded.git"
+    refspec: d323115ecd437e397bd504758ba52988900f4747
+    layers:
+        meta-oe:
+        meta-multimedia:
+        meta-networking:
+        meta-python:
+        meta-filesystems:
+        meta-gnome:
+
+  sources/meta-security:
+    url: "https://git.yoctoproject.org/git/meta-security"
+    refspec: 5050d1267ad41288c903086030594f8702bfa039
+    layers:
+        meta-tpm:
+
+  sources/meta-swupdate:
+    url: "https://github.com/sbabic/meta-swupdate.git"
+    refspec: 52efeb3bc69b79e244cf369a1febe9dbf8c3f830
+
+  sources/meta-clang:
+    url: "https://github.com/kraj/meta-clang.git"
+    # the refspec for latest hardknott
+    refspec: b0d805060791006d651efd3d7ae3dd5add8f70fe
+
+  sources/meta-browser:
+    url: "https://github.com/OSSystems/meta-browser.git"
+    refspec: 02c8477a59d5357a6a3ad72599623e81331ed592
+    layers:
+        meta-chromium:
+        meta-firefox:
+
+  sources/meta-freescale:
+    url: "https://github.com/Freescale/meta-freescale.git"
+    refspec: 25e9cbddbd32802634bafef62ba08da9821c604d
+
+  sources/meta-freescale-3rdparty:
+    url: "https://github.com/Freescale/meta-freescale-3rdparty.git"
+    refspec: 7ca4269e9710fd9a8e6430e89e06bf5dfb33e421
+
+  sources/meta-freescale-distro:
+    url: "https://github.com/Freescale/meta-freescale-distro.git"
+    refspec: 916df6d24c0a33a3b1533bde70b6a2724ec77af4
+
+  sources/meta-imx:
+    url: "https://source.codeaurora.org/external/imx/meta-imx.git"
+    refspec: 15fddd76b460fb56d9de121eb2d16a1e22cbe900
+    layers:
+      meta-bsp:
+      meta-ml:
+      meta-sdk:
+    patches:
+      01-workaround-deepview-rt-QA-check:
+        path: patches/0001-workaround-remove-QA-check-about-RDEPAND-of-deepview.patch
+        repo: meta-srg-im8p
+
+  sources/meta-python2:
+    url: "https://git.openembedded.org/meta-python2"
+    refspec: 8db9e4f6ceae33d7a4f55453d31e69f9858af4eb
+
+  sources/meta-rust:
+    url: "https://github.com/meta-rust/meta-rust.git"
+    refspec: 448047c7e4746eac8f0a96a2e3966b2219e2a4ca
+
+  # QT5.15.x for gatesgarth
+  sources/meta-qt5:
+    url: "https://code.qt.io/yocto/meta-qt5.git"
+    # lts 5.15.2 is latest GPL support
+    # late version need commercial license support
+    # so fix the commit id for lts-5.15.2
+    refspec: a00af3eae082b772469d9dd21b2371dd4d237684
+
+  sources/meta-nxp-demo-experience:
+    url: https://source.codeaurora.org/external/imxsupport/meta-nxp-demo-experience
+    refspec: 46107357abd2d2da9ffd702c87fce3984a422435

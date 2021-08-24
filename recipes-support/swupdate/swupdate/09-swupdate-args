@@ -11,7 +11,7 @@ FW_PRINTENV="/usr/bin/fw_printenv"
 FW_SETENV="/usr/bin/fw_setenv"
 FW_ENVFILE="/etc/fw_env.config"
 
-if [[ "x$current_part" == "x1" ]]; then
+if [[ "x$current_part" == "x2" ]]; then
     selection="stable,rootB"
     # current_part=1
     # update_part=2

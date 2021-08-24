@@ -26,7 +26,7 @@ ROOT_ROFSTYPE="ext4"
 ROOT_ROMOUNTOPTIONS_DEVICE="ro,noatime,nodiratime"
 
 # default for (emmc)
-ROOT_RWDEVICE="/dev/mmcblk2p3"
+ROOT_RWDEVICE="/dev/mmcblk2p4"
 ROOT_RWFSTYPE="ext4"
 ROOT_RWMOUNT="/data"
 ROOT_RWMOUNTOPTIONS_DEVICE="rw,noatime"
@@ -53,10 +53,10 @@ read_args() {
 		case $arg in
 			root=*)
 				ROOT_RODEVICE=$optarg
-				if [ "${ROOT_RODEVICE}" == "/dev/mmcblk2p1" ] || [ "${ROOT_RODEVICE}" == "/dev/mmcblk2p2" ]; then
-					ROOT_RWDEVICE="/dev/mmcblk2p3" 	# for emmc
-				elif [ "${ROOT_RODEVICE}" == "/dev/mmcblk1p1" ] || [ "${ROOT_RODEVICE}" == "/dev/mmcblk1p2" ]; then
-					ROOT_RWDEVICE="/dev/mmcblk1p3"  # for sdhc
+				if [ "${ROOT_RODEVICE}" == "/dev/mmcblk2p2" ] || [ "${ROOT_RODEVICE}" == "/dev/mmcblk2p3" ]; then
+					ROOT_RWDEVICE="/dev/mmcblk2p4" 	# for emmc
+				elif [ "${ROOT_RODEVICE}" == "/dev/mmcblk1p2" ] || [ "${ROOT_RODEVICE}" == "/dev/mmcblk1p3" ]; then
+					ROOT_RWDEVICE="/dev/mmcblk1p4"  # for sdhc
 				fi
 				;;
 			rootfstype=*)
