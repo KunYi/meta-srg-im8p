@@ -36,19 +36,20 @@ IMAGE_INSTALL_append = " \
 
 add_boot_files() {
 	echo "add boot files"
-  install -m 644 "${DEPLOY_DIR_IMAGE}/srg-im8p.dtb" "${IMAGE_ROOTFS}/boot/srg-im8p.dtb"
+	install -m 644 "${DEPLOY_DIR_IMAGE}/Image" "${IMAGE_ROOTFS}/boot/Image"
+	install -m 644 "${DEPLOY_DIR_IMAGE}/srg-im8p.dtb" "${IMAGE_ROOTFS}/boot/srg-im8p.dtb"
 	install -m 644 "${DEPLOY_DIR_IMAGE}/initrd-installer-${MACHINE}.img" "${IMAGE_ROOTFS}/boot/initrd.img"
 }
 
 add_installed_files() {
 	echo "add installed files"
-  install -d  ${IMAGE_ROOTFS}/opt/img
+	install -d  ${IMAGE_ROOTFS}/opt/img
 	install -m 644 "${DEPLOY_DIR_IMAGE}/${INSTALLED_IMAGE}-${MACHINE}.wic.bmap" "${IMAGE_ROOTFS}/opt/img/${INSTALLED_IMAGE}.wic.bmap"
 	install -m 644 "${DEPLOY_DIR_IMAGE}/${INSTALLED_IMAGE}-${MACHINE}.${IMAGE_SUFFIX}" "${IMAGE_ROOTFS}/opt/img/${INSTALLED_IMAGE}.${IMAGE_SUFFIX}"
-  install -m 644 "${DEPLOY_DIR_IMAGE}/imx-boot" "${IMAGE_ROOTFS}/opt/img"
+	install -m 644 "${DEPLOY_DIR_IMAGE}/imx-boot-2021.04" "${IMAGE_ROOTFS}/opt/img/imx-boot"
 
-  # for install emmc_install.sh into rootfs
-  echo "#!/bin/bash\n\
+	# for install emmc_install.sh into rootfs
+	echo "#!/bin/bash\n\
 \n\
 # Enable strict shell mode\n\
 set -euo pipefail\n\
@@ -69,7 +70,6 @@ echo \"===================================\"\n\
 sgdisk -e /dev/\$EMMC_DEV       # fixed gpt tabel\n\
 parted -s /dev/\$EMMC_DEV resizepart 4 100%\n\
 resize2fs /dev/\${EMMC_DEV}p4   # resize filesystem\n\
-
 \n\
 # flash bootloader into EMMC boot0 partition\n\
 echo \"===================================\"\n\
@@ -94,7 +94,35 @@ echo \"===========================\"\n\
 poweroff\n\
 " > "${WORKDIR}/emmc_install.sh"
 
+  # for install upbl.sh into rootfs
+  echo "#!/bin/bash\n\
+\n\
+# Enable strict shell mode\n\
+set -euo pipefail\n\
+\n\
+EMMC_DEV=\"mmcblk2\"\n\
+\n\
+# flash bootloader into EMMC boot0 partition\n\
+echo \"===================================\"\n\
+echo \"= will flash bootloader into EMMC =\"\n\
+echo \"===================================\"\n\
+echo \"writing primary bootloader ...\"\n\
+echo 0 > \"/sys/block/\${EMMC_DEV}boot0/force_ro\"    #  disable readonly\n\
+dd if=/opt/img/imx-boot of=/dev/\${EMMC_DEV}boot0 bs=4K conv=fsync && sync  #  flash image into boot0 partitions\n\
+mmc bootpart enable 1 0 /dev/\$EMMC_DEV               #  enable boot from boot0 partitions\n\
+echo 1 > \"/sys/block/\${EMMC_DEV}boot0/force_ro\" #  enable readonly\n\
+echo \"writing alternate bootloader ...\"\n\
+echo 0 > \"/sys/block/\${EMMC_DEV}boot1/force_ro\"    #  disable readonly\n\
+dd if=/opt/img/imx-boot of=/dev/\${EMMC_DEV}boot1 bs=4K conv=fsync && sync  #  flash image into boot0 partitions\n\
+#\n\
+#mmc bootpart enable 1 1 /dev/\$EMMC_DEV               #  enable boot from boot1 partitions\n\
+#\n\
+echo 1 > \"/sys/block/\${EMMC_DEV}boot1/force_ro\" #  enable readonly\n\
+  " > "${WORKDIR}/upbl.sh"
+
 	install -m 0755 "${WORKDIR}/emmc_install.sh" "${IMAGE_ROOTFS}/usr/sbin"
+	install -m 0755 "${WORKDIR}/upbl.sh" "${IMAGE_ROOTFS}/opt/img/upbl.sh"
+
 }
 
 ROOTFS_POSTPROCESS_COMMAND += " add_boot_files; add_installed_files;"

@@ -7,6 +7,38 @@ require recipes-fsl/images/imx-image-multimedia.bb
 
 CONFLICT_DISTRO_FEATURES = "directfb"
 
+#===========================================================================================================
+# start for generation .swu file
+#===========================================================================================================
+
+# remove comment
+#inherit swupdate-image
+
+SRC_URI += " \
+    file://sw-description \
+"
+
+SWUPDATE_IMAGES_FSTYPES[srg-im8p-image] = ".ext4.zst"
+
+RFS_VERSION ?= "1.0.1"
+SWU_PRIVATE_KEY ?= "${TOPDIR}/../swu-keys/priv.pem"
+SWU_PRIVATE_KEY_PASSWORD ?= "${TOPDIR}/../swu-keys/passout"
+SWU_SOFTWARE_VERSION ??= "1.0.0"
+
+python () {
+    # detect in docker
+    if os.path.exists("/.dockerenv"):
+        d.setVar("SWUPDATE_PRIVATE_KEY", d.getVar("SWU_PRIVATE_KEY").replace("build/..", "repo"))
+        d.setVar("SWUPDATE_PASSWORD_FILE", d.getVar("SWU_PRIVATE_KEY_PASSWORD").replace("build/..", "repo"))
+}
+
+SWUPDATE_SIGNING = "RSA"
+SWUPDATE_PRIVATE_KEY = "${SWU_PRIVATE_KEY}"
+SWUPDATE_PASSWORD_FILE = "${SWU_PRIVATE_KEY_PASSWORD}"
+#===========================================================================================================
+# end for generation .swu file
+#===========================================================================================================
+
 # Add machine learning for certain SoCs
 ML_PKGS                   ?= ""
 ML_STATICDEV              ?= ""
@@ -58,6 +90,9 @@ IMAGE_INSTALL += " \
     device-init \
     datawipe \
     stressapptest \
+    networkmanager \
+    networkmanager-nmtui \
+    modemmanager \
 "
 
 TOOLCHAIN_TARGET_TASK += " \

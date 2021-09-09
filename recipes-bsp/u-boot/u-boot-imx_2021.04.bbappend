@@ -3,7 +3,7 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 DESCRIPTION = "i.MX U-Boot suppporting SRG-IM8P boards."
 UBOOT_SRC = "gitsm://github.com/KunYi/uboot-imx.git;protocol=https"
 SRCBRANCH = "srg-im8p_v2021.04"
-SRCREV = "4ed1ae03eb3dc7bc26f3d6a6d47778f46545982f"
+SRCREV = "79943c815e0e3fe2220cd24a52bef1e463821e0c"
 SRC_URI = "${UBOOT_SRC};branch=${SRCBRANCH} \
 	file://fw_env.config \
 "
