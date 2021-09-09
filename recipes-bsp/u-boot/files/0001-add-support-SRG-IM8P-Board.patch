@@ -1,4 +1,4 @@
-From 2d27bbb7eaf348d13537180a7eefedd37eb54290 Mon Sep 17 00:00:00 2001
+From 6709ed4a5fd6ed46aa66d6a37d197a51280a1f3e Mon Sep 17 00:00:00 2001
 From: KunYi <kunyi.chen@gmail.com>
 Date: Mon, 12 Apr 2021 17:47:50 +0800
 Subject: [PATCH] add support SRG-IM8P Board
@@ -10,7 +10,7 @@ include the below
   save env. into emmc
 ---
  arch/arm/dts/Makefile                |    1 +
- arch/arm/dts/srg-im8p.dts            |  621 +++++++++
+ arch/arm/dts/srg-im8p.dts            |  639 +++++++++
  arch/arm/mach-imx/imx8m/Kconfig      |    9 +-
  arch/arm/mach-imx/mmc_env.c          |    3 +
  board/aaeon/srg-im8p/Kconfig         |   19 +
@@ -54,7 +54,7 @@ include the below
  lib/zlib/inftrees.c                  |   19 +-
  lib/zlib/uncompr.c                   |   97 ++
  lib/zlib/zlib.c                      |    3 +
- 45 files changed, 6718 insertions(+), 36 deletions(-)
+ 45 files changed, 6736 insertions(+), 36 deletions(-)
  create mode 100644 arch/arm/dts/srg-im8p.dts
  create mode 100644 board/aaeon/srg-im8p/Kconfig
  create mode 100644 board/aaeon/srg-im8p/MAINTAINERS
@@ -85,7 +85,7 @@ index 47cd054d84..4d6eec6491 100644
 +++ b/arch/arm/dts/Makefile
 @@ -784,6 +784,7 @@ dtb-$(CONFIG_ARCH_IMX8) += \
  	imx8-giedi.dtb
-
+ 
  dtb-$(CONFIG_ARCH_IMX8M) += \
 +	srg-im8p.dtb \
  	imx8mm-evk.dtb \
@@ -93,10 +93,10 @@ index 47cd054d84..4d6eec6491 100644
  	imx8mm-ddr4-evk.dtb \
 diff --git a/arch/arm/dts/srg-im8p.dts b/arch/arm/dts/srg-im8p.dts
 new file mode 100644
-index 0000000000..ce6de928b7
+index 0000000000..8f8f341524
 --- /dev/null
 +++ b/arch/arm/dts/srg-im8p.dts
-@@ -0,0 +1,621 @@
+@@ -0,0 +1,639 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright 2021 UWINGS
@@ -129,6 +129,18 @@ index 0000000000..ce6de928b7
 +		regulator-min-microvolt = <5000000>;
 +		regulator-max-microvolt = <5000000>;
 +		gpio = <&gpio1 05 GPIO_ACTIVE_HIGH>;
++		enable-active-low;
++		regulator-always-on;
++	};
++
++	reg_usb2_host_vbus: regulator-usb2-vbus {
++		compatible = "regulator-fixed";
++		regulator-name = "usb2_host_vbus";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_usb2_vbus>;
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		gpio = <&gpio1 06 GPIO_ACTIVE_HIGH>;
 +		enable-active-low;
 +		regulator-always-on;
 +	};
@@ -608,7 +620,13 @@ index 0000000000..ce6de928b7
 +
 +	pinctrl_usb1_vbus: usb1grp {
 +		fsl,pins = <
-+			MX8MP_IOMUXC_GPIO1_IO14__GPIO1_IO14	0x19
++			MX8MP_IOMUXC_GPIO1_IO05__GPIO1_IO05	0x19
++		>;
++	};
++
++	pinctrl_usb2_vbus: usb2grp {
++		fsl,pins = <
++			MX8MP_IOMUXC_GPIO1_IO06__GPIO1_IO06	0x19
 +		>;
 +	};
 +
@@ -719,7 +737,7 @@ index 0000000000..ce6de928b7
 +	};
 +};
 diff --git a/arch/arm/mach-imx/imx8m/Kconfig b/arch/arm/mach-imx/imx8m/Kconfig
-index 41c68a49a3..ab4b685b51 100644
+index 41c68a49a3..3f103e3028 100644
 --- a/arch/arm/mach-imx/imx8m/Kconfig
 +++ b/arch/arm/mach-imx/imx8m/Kconfig
 @@ -30,7 +30,7 @@ config SYS_SOC
@@ -734,15 +752,15 @@ index 41c68a49a3..ab4b685b51 100644
 @@ -154,8 +154,15 @@ config TARGET_VERDIN_IMX8MM
         select SUPPORT_SPL
         select IMX8M_LPDDR4
-
+ 
 +config TARGET_SRG_IM8P
-+       bool "Support AAEON SRG-iMX8MPlus Gateway"
++       bool "Support AAEON SRG-IM8P Gateway"
 +       select IMX8MP
 +       select SUPPORT_SPL
 +       select IMX8M_LPDDR4
 +
  endchoice
-
+ 
 +source "board/aaeon/srg-im8p/Kconfig"
  source "board/freescale/imx8mq_evk/Kconfig"
  source "board/freescale/imx8mq_val/Kconfig"
@@ -758,7 +776,7 @@ index 22d8daa107..b2b771bbf5 100644
 +	/* fixed env. on emmc device */
 +	if (env_get_yesno("env_on_emmc"))
 +		return CONFIG_SYS_MMC_ENV_DEV;
-
+ 
  	return board_mmc_get_env_dev(devno);
  }
 diff --git a/board/aaeon/srg-im8p/Kconfig b/board/aaeon/srg-im8p/Kconfig
@@ -819,7 +837,7 @@ index 0000000000..3f3d966d35
 +endif
 diff --git a/board/aaeon/srg-im8p/README.md b/board/aaeon/srg-im8p/README.md
 new file mode 100644
-index 0000000000..0b17e84853
+index 0000000000..d8a8cb7111
 --- /dev/null
 +++ b/board/aaeon/srg-im8p/README.md
 @@ -0,0 +1,60 @@
@@ -3459,20 +3477,20 @@ index d886808dba..ca7d2f936b 100644
  	char mmcblk[32];
 +	u32 bootpart;
  	u32 dev_no = mmc_get_env_dev();
-
+ 
  	if (!check_mmc_autodetect())
  		return;
-
+ 
  	env_set_ulong("mmcdev", dev_no);
 +	bootpart = env_get_ulong("bootpart", 10, 1);
-
+ 
  	/* Set mmcblk env */
 -	sprintf(mmcblk, "/dev/mmcblk%dp2 rootwait rw",
 -		mmc_map_to_kernel_blk(dev_no));
 +	sprintf(mmcblk, "/dev/mmcblk%dp%d rootwait rw",
 +		mmc_map_to_kernel_blk(dev_no), bootpart);
  	env_set("mmcroot", mmcblk);
-
+ 
  	sprintf(cmd, "mmc dev %d", dev_no);
 diff --git a/cmd/Kconfig b/cmd/Kconfig
 index 60d42073aa..31d4fb761f 100644
@@ -3485,7 +3503,7 @@ index 60d42073aa..31d4fb761f 100644
 +	select LIB_ELF
  	help
  	  Boot an ELF/vxWorks image from the memory.
-
+ 
 @@ -778,11 +779,13 @@ config CMD_LZMADEC
  config CMD_UNZIP
  	bool "unzip"
@@ -3493,13 +3511,13 @@ index 60d42073aa..31d4fb761f 100644
 +	select GZIP
  	help
  	  Uncompress a zip-compressed memory region.
-
+ 
  config CMD_ZIP
  	bool "zip"
 +	select GZIP_COMPRESSED
  	help
  	  Compress a memory region with zlib deflate method.
-
+ 
 @@ -799,7 +802,7 @@ config CMD_ARMFLASH
  config CMD_ADC
  	bool "adc - Access Analog to Digital Converters info and data"
@@ -3512,7 +3530,7 @@ index 60d42073aa..31d4fb761f 100644
 @@ -2009,6 +2012,12 @@ config CMD_FAT
  	help
  	  Support for the FAT fs
-
+ 
 +config CMD_SQUASHFS
 +	bool "SquashFS command support"
 +	select FS_SQUASHFS
@@ -3573,7 +3591,7 @@ index 1860a3f2e5..3b1244cff0 100644
 +		ALLOC_CACHE_ALIGN_BUFFER(u8, ext_csd, MMC_MAX_BLOCK_LEN);
 +		u8 wp;
 +		int ret;
-
+ 
  #if CONFIG_IS_ENABLED(MMC_HW_PARTITIONING)
  		puts("HC WP Group Size: ");
 @@ -90,6 +94,28 @@ static void print_mmcinfo(struct mmc *mmc)
@@ -3608,7 +3626,7 @@ index 1860a3f2e5..3b1244cff0 100644
 @@ -872,9 +898,30 @@ static int do_mmc_bkops_enable(cmd_tbl_t *cmdtp, int flag,
  }
  #endif
-
+ 
 +static int do_mmc_boot_wp(cmd_tbl_t *cmdtp, int flag,
 +			  int argc, char * const argv[])
 +{
@@ -3921,7 +3939,7 @@ index c85a3cc933..9b6a5a3dcf 100644
 @@ -682,6 +682,8 @@ static void set_sysctl(struct fsl_esdhc_priv *priv, struct mmc *mmc, uint clock)
  	if (ret)
  		pr_warn("fsl_esdhc_imx: Internal clock never stabilised.\n");
-
+ 
 +	udelay(1000); /* for improve the compatibility for UHS-1 SD cards */
 +
  #ifdef CONFIG_FSL_USDHC
@@ -3930,7 +3948,7 @@ index c85a3cc933..9b6a5a3dcf 100644
 @@ -959,6 +961,7 @@ static int esdhc_set_ios_common(struct fsl_esdhc_priv *priv, struct mmc *mmc)
  	if (priv->clock != clock)
  		set_sysctl(priv, mmc, clock);
-
+ 
 +	udelay(1000); /* for improve the compatibility for UHS-1 SD cards */
  #ifdef MMC_SUPPORTS_TUNING
  	if (mmc->clk_disable) {
@@ -3941,8 +3959,8 @@ index e4259872a5..1ae7cff304 100644
 +++ b/drivers/mmc/mmc.c
 @@ -726,7 +726,7 @@ static int mmc_complete_op_cond(struct mmc *mmc)
  }
-
-
+ 
+ 
 -static int mmc_send_ext_csd(struct mmc *mmc, u8 *ext_csd)
 +int mmc_send_ext_csd(struct mmc *mmc, u8 *ext_csd)
  {
@@ -3951,7 +3969,7 @@ index e4259872a5..1ae7cff304 100644
 @@ -818,6 +818,11 @@ int mmc_switch(struct mmc *mmc, u8 set, u8 index, u8 value)
  	return __mmc_switch(mmc, set, index, value, true);
  }
-
+ 
 +int mmc_boot_wp(struct mmc *mmc)
 +{
 +	return mmc_switch(mmc, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BOOT_WP, 1);
@@ -3985,9 +4003,9 @@ index 1cb9831be8..620af7f044 100644
 --- a/fs/Kconfig
 +++ b/fs/Kconfig
 @@ -22,4 +22,6 @@ source "fs/cramfs/Kconfig"
-
+ 
  source "fs/yaffs2/Kconfig"
-
+ 
 +source "fs/squashfs/Kconfig"
 +
  endmenu
@@ -4002,7 +4020,7 @@ index 42e669c40c..937cbcf6e8 100644
 +obj-$(CONFIG_SPL_FS_SQUASHFS) += squashfs/
  else
  obj-y				+= fs.o
-
+ 
 @@ -23,5 +24,6 @@ obj-$(CONFIG_SANDBOX) += sandbox/
  obj-$(CONFIG_CMD_UBIFS) += ubifs/
  obj-$(CONFIG_YAFFS2) += yaffs2/
@@ -4019,9 +4037,9 @@ index 0c66d60477..047b90c476 100644
  #include <linux/math64.h>
  #include <efi_loader.h>
 +#include <squashfs.h>
-
+ 
  DECLARE_GLOBAL_DATA_PTR;
-
+ 
 @@ -55,6 +56,9 @@ static int fs_ls_generic(const char *dirname)
  		if (dent->type == FS_DT_DIR) {
  			printf("            %s/\n", dent->name);
@@ -6690,9 +6708,9 @@ index a89d161122..32b69eadd2 100644
 --- a/include/configs/imx8mp_evk.h
 +++ b/include/configs/imx8mp_evk.h
 @@ -11,6 +11,19 @@
-
+ 
  #include "imx_env.h"
-
+ 
 +#define CONFIG_SYS_MMC_ENV_DEV		1   /* USDHC2 for MicroSD(1), USDHC3 for EMMC(2) */
 +#define CONFIG_MMCROOT			"/dev/mmcblk1p1"  /* USDHC2 */
 +
@@ -6706,7 +6724,7 @@ index a89d161122..32b69eadd2 100644
 +#undef CONFIG_SYS_MALLOC_LEN
 +#endif
 +#define CONFIG_SYS_MALLOC_LEN		SZ_128M
-
+ 
  #define CONFIG_SPL_MAX_SIZE		(152 * 1024)
  #define CONFIG_SYS_MONITOR_LEN		(512 * 1024)
 @@ -103,14 +116,16 @@
@@ -6747,17 +6765,17 @@ index a89d161122..32b69eadd2 100644
  		"if test ${boot_fit} = yes || test ${boot_fit} = try; then " \
 @@ -169,7 +184,7 @@
  #endif
-
+ 
  /* Link Definitions */
 -#define CONFIG_LOADADDR			0x40480000
 +#define CONFIG_LOADADDR			0x43800000
-
+ 
  #define CONFIG_SYS_LOAD_ADDR		CONFIG_LOADADDR
-
+ 
 @@ -186,12 +201,6 @@
  #define CONFIG_ENV_SPI_MODE		CONFIG_SF_DEFAULT_MODE
  #define CONFIG_ENV_SPI_MAX_HZ		CONFIG_SF_DEFAULT_SPEED
-
+ 
 -#define CONFIG_SYS_MMC_ENV_DEV		1   /* USDHC2 */
 -#define CONFIG_MMCROOT			"/dev/mmcblk1p2"  /* USDHC2 */
 -
@@ -6769,7 +6787,7 @@ index a89d161122..32b69eadd2 100644
  #define PHYS_SDRAM			0x40000000
 diff --git a/include/configs/srg-im8p.h b/include/configs/srg-im8p.h
 new file mode 100644
-index 0000000000..c17585688f
+index 0000000000..58dd9537b8
 --- /dev/null
 +++ b/include/configs/srg-im8p.h
 @@ -0,0 +1,315 @@
@@ -6789,7 +6807,7 @@ index 0000000000..c17585688f
 +#include "imx_env.h"
 +
 +#define CONFIG_SYS_MMC_ENV_DEV		2   /* USDHC2 for MicroSD(1), USDHC3 for EMMC(2) */
-+#define CONFIG_MMCROOT			"/dev/mmcblk2p1"  /* EMMC */
++#define CONFIG_MMCROOT			"/dev/mmcblk2p2"  /* EMMC */
 +
 +#ifdef  CONFIG_SYS_BOOTM_LEN
 +#undef  CONFIG_SYS_BOOTM_LEN
@@ -6905,10 +6923,10 @@ index 0000000000..c17585688f
 +#define FALLBACK_BOOTCOUNT_ENV \
 +	"bootlimit=4\0" \
 +	"bootfallback=echo Fallback to previous RootFS; " \
-+		"if test ${bootpart} = 1; then " \
-+		"	setenv bootpart 2; " \
++		"if test ${bootpart} = 2; then " \
++		"	setenv bootpart 3; " \
 +		"else " \
-+		"	setenv bootpart 1; " \
++		"	setenv bootpart 2; " \
 +		"fi; " \
 +		"setenv mmcroot /dev/mmcblk2p${bootpart} rootwait rw; " \
 +		"setenv upgrade_available 0; setenv bootcount 0; saveenv;\0" \
@@ -6930,7 +6948,7 @@ index 0000000000..c17585688f
 +	"fdt_addr_r=0x43000000\0"			\
 +	"fdt_addr=0x43000000\0"			\
 +	"boot_fdt=try\0" \
-+	"bootpart=1\0" \
++	"bootpart=2\0" \
 +	"fdt_high=0xffffffffffffffff\0"		\
 +	"boot_fit=no\0" \
 +	"fdtfile=" CONFIG_DEFAULT_FDT_FILE "\0" \
@@ -7097,19 +7115,19 @@ index 9cd3b3f106..13240e8a7b 100644
  #define FS_TYPE_UBIFS	4
  #define FS_TYPE_BTRFS	5
 +#define FS_TYPE_SQUASHFS 6
-
+ 
  int do_fat_size(cmd_tbl_t *cmdtp, int flag, int argc, char *const argv[]);
-
+ 
 diff --git a/include/mmc.h b/include/mmc.h
 index 59570995a1..c597a76b64 100644
 --- a/include/mmc.h
 +++ b/include/mmc.h
 @@ -178,6 +178,7 @@ static inline bool mmc_is_tuning_cmd(uint cmdidx)
  #define MMC_STATUS_ERROR	(1 << 19)
-
+ 
  #define MMC_STATE_PRG		(7 << 9)
 +#define MMC_STATE_TRANS		(4 << 9)
-
+ 
  #define MMC_VDD_165_195		0x00000080	/* VDD voltage 1.65 - 1.95 */
  #define MMC_VDD_20_21		0x00000100	/* VDD voltage 2.0 ~ 2.1 */
 @@ -224,7 +225,9 @@ static inline bool mmc_is_tuning_cmd(uint cmdidx)
@@ -7125,7 +7143,7 @@ index 59570995a1..c597a76b64 100644
 @@ -945,6 +948,26 @@ int mmc_map_to_kernel_blk(int dev_no);
   */
  struct blk_desc *mmc_get_blk_desc(struct mmc *mmc);
-
+ 
 +/**
 + * mmc_send_ext_csd() - read the extended CSD register
 + *
@@ -7186,7 +7204,7 @@ index e23ceb50ca..a33cc8780d 100644
 @@ -110,6 +110,12 @@ extern "C" {
  #  define voidp                 z_voidp
  #endif
-
+ 
 +#if defined(ZLIB_CONST) && !defined(z_const)
 +#  define z_const const
 +#else
@@ -7199,7 +7217,7 @@ index e23ceb50ca..a33cc8780d 100644
 @@ -710,6 +716,32 @@ ZEXTERN  uInt ZEXPORT crc32  OF((uInt crc, const Bytef *buf, uInt len));
       if (crc != original_crc) error();
  */
-
+ 
 +ZEXTERN int ZEXPORT uncompress OF((Bytef *dest, uLongf *destLen,
 +				   const Bytef *source, uLong sourceLen));
 +/*
@@ -7236,7 +7254,7 @@ index c43149fc1a..7ae7bbf334 100644
 @@ -441,6 +441,12 @@ config GZIP
  	help
  	  This enables support for GZIP compression algorithm.
-
+ 
 +config ZLIB_UNCOMPRESS
 +	bool "Enables zlib's uncompress() functionality"
 +	help
@@ -7280,7 +7298,7 @@ index b71b9695a8..caee502f88 100644
 -        end = -1;
 +        match = 0;
      }
-
+ 
      /* initialize state for loop */
 @@ -212,13 +210,12 @@ int inflate_table(codetype type, unsigned short FAR *lens, unsigned codes,
      for (;;) {
@@ -7414,6 +7432,6 @@ index 7e1570292c..90e05e7d4d 100644
 +#if IS_ENABLED(CONFIG_ZLIB_UNCOMPRESS)
 +#include "uncompr.c"
 +#endif
---
-2.32.0
+-- 
+2.33.0
 
