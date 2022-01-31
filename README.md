@@ -3,7 +3,7 @@ SRG-IM8P Yocto BSP
 
 The BSP for **AAEON SRG-IM8P IoT Gateway**.
 to integration [SWUpdate](https://sbabic.github.io/swupdate/) support,
-base on **NXP offical BSP 5.10.9_1.0.0 (gatesgarth)** and to extend new feature.
+base on **NXP offical BSP 5.10.35_2.0.0(hardknott)** and to extend new feature.
 
 ### extend new features include the below
 * **Over-The-Air update**, support with **Eclipse Hawkbit**
